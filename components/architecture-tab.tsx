@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import MermaidDiagram from "./mermaid-diagram"
@@ -110,7 +110,7 @@ graph TD
     else setDisplayMode("mermaid")
   }
 
-  const copyToClipboard = async (text: string) => {
+  const copyToClipboard = useCallback(async (text: string) => {
     if (navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(text)
@@ -120,7 +120,7 @@ graph TD
         console.error("Failed to copy text: ", err)
       }
     }
-  }
+  }, [])
 
   const currentDiagramSyntax = view === "pipeline" ? pipelineArchitecture : cloudArchitecture
   const diagramTitle = view === "pipeline" ? "Image Processing Pipeline" : "AWS Cloud Deployment Architecture"
