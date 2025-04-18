@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { ZoomIn, ZoomOut, Maximize2, Move } from "lucide-react"
+import { useEffectEvent } from "@/hooks/use-effect-event"
 
 interface MermaidDiagramProps {
   chart: string
@@ -55,7 +56,8 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
   }
 
   // Function to remove "Unsupported markdown: list" text nodes
-  const removeUnsupportedMarkdownText = useCallback(() => {
+  // Using useEffectEvent to avoid re-creating this function on every render
+  const removeUnsupportedMarkdownText = useEffectEvent(() => {
     if (!containerRef.current) return
 
     // Find all text nodes in the SVG
@@ -81,7 +83,7 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
     listMarkers.forEach((marker) => {
       marker.remove()
     })
-  }, [])
+  })
 
   useEffect(() => {
     // We need to dynamically import mermaid to avoid SSR issues

@@ -59,10 +59,11 @@
     "vaul": "^0.9.6",
     "zod": "^3.24.1",
     "@hello-pangea/dnd": "latest",
-    "panzoom": "latest",
-    "mermaid": "latest",
     "fs": "latest",
-    "path": "latest"
+    "path": "latest",
+    "child_process": "latest",
+    "panzoom": "latest",
+    "mermaid": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

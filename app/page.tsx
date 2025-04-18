@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react"
 import HomeTab from "@/components/home-tab"
+import CodeTab from "@/components/code-tab"
+import ArchitectureTab from "@/components/architecture-tab"
+import { ThemeProvider } from "@/components/theme-provider"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { Filter } from "@/types/filter"
+import HookTest from "@/components/hook-test"
 
 export default function CodegramApp() {
+  const [activeTab, setActiveTab] = useState("home")
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [filters, setFilters] = useState<Filter[]>([
     { id: "1", name: "grayscale", enabled: false, params: { intensity: 100 } },
@@ -15,6 +20,7 @@ export default function CodegramApp() {
     { id: "5", name: "sharpen", enabled: false, params: { amount: 50 } },
   ])
   const [mounted, setMounted] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
 
   // Ensure theme is applied after hydration
   useEffect(() => {
@@ -53,29 +59,84 @@ export default function CodegramApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-mono transition-colors duration-200">
-      <div className="container mx-auto p-6">
-        <header className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Codegram Filter UI</h1>
-            <p className="text-gray-600 dark:text-gray-400">Developer tool for image filter pipeline</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-          </div>
-        </header>
+    <ThemeProvider defaultTheme="light">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-mono transition-colors duration-200">
+        <div className="container mx-auto p-6">
+          <header className="mb-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Codegram Filter UI</h1>
+              <p className="text-gray-600 dark:text-gray-400">Developer tool for image filter pipeline</p>
+            </div>
+            <div className="flex items-center gap-4">
+              {process.env.NODE_ENV === "development" && (
+                <button
+                  onClick={() => setShowDebug(!showDebug)}
+                  className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md"
+                >
+                  {showDebug ? "Hide Debug" : "Show Debug"}
+                </button>
+              )}
+              <ThemeToggle />
+            </div>
+          </header>
 
-        <div className="mb-8">
-          <HomeTab
-            selectedImage={selectedImage}
-            setSelectedImage={setSelectedImage}
-            filters={filters}
-            onFilterToggle={handleFilterToggle}
-            onFilterReorder={handleFilterReorder}
-            onFilterParamChange={handleFilterParamChange}
-          />
+          {showDebug && (
+            <div className="mb-6">
+              <HookTest />
+            </div>
+          )}
+
+          <div className="mb-8">
+            <div className="grid w-full grid-cols-3 mb-8 bg-gray-200 dark:bg-gray-800 rounded-md">
+              <button
+                onClick={() => setActiveTab("home")}
+                className={`py-2 text-center text-sm font-medium transition-colors ${
+                  activeTab === "home"
+                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-t-md"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Home
+              </button>
+              <button
+                onClick={() => setActiveTab("code")}
+                className={`py-2 text-center text-sm font-medium transition-colors ${
+                  activeTab === "code"
+                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-t-md"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Code
+              </button>
+              <button
+                onClick={() => setActiveTab("architecture")}
+                className={`py-2 text-center text-sm font-medium transition-colors ${
+                  activeTab === "architecture"
+                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-t-md"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                Architecture
+              </button>
+            </div>
+
+            {activeTab === "home" && (
+              <HomeTab
+                selectedImage={selectedImage}
+                setSelectedImage={setSelectedImage}
+                filters={filters}
+                onFilterToggle={handleFilterToggle}
+                onFilterReorder={handleFilterReorder}
+                onFilterParamChange={handleFilterParamChange}
+              />
+            )}
+
+            {activeTab === "code" && <CodeTab filters={filters.filter((f) => f.enabled)} />}
+
+            {activeTab === "architecture" && <ArchitectureTab />}
+          </div>
         </div>
       </div>
-    </div>
+    </ThemeProvider>
   )
 }
