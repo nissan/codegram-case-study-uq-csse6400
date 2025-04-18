@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { ZoomIn, ZoomOut, Maximize2, Move } from "lucide-react"
 
 interface MermaidDiagramProps {
@@ -55,7 +55,7 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
   }
 
   // Function to remove "Unsupported markdown: list" text nodes
-  const removeUnsupportedMarkdownText = () => {
+  const removeUnsupportedMarkdownText = useCallback(() => {
     if (!containerRef.current) return
 
     // Find all text nodes in the SVG
@@ -81,7 +81,7 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
     listMarkers.forEach((marker) => {
       marker.remove()
     })
-  }
+  }, [])
 
   useEffect(() => {
     // We need to dynamically import mermaid to avoid SSR issues
@@ -224,10 +224,10 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
         panzoomInstanceRef.current.dispose()
       }
     }
-  }, [chart])
+  }, [chart, removeUnsupportedMarkdownText])
 
   // Zoom in function - using the correct panzoom API
-  const handleZoomIn = () => {
+  const handleZoomIn = useCallback(() => {
     if (panzoomInstanceRef.current) {
       const currentScale = panzoomInstanceRef.current.getTransform().scale
       const newScale = currentScale * 1.2 // Zoom in by 20%
@@ -242,10 +242,10 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
         panzoomInstanceRef.current.zoomTo(centerX, centerY, newScale)
       }
     }
-  }
+  }, [])
 
   // Zoom out function - using the correct panzoom API
-  const handleZoomOut = () => {
+  const handleZoomOut = useCallback(() => {
     if (panzoomInstanceRef.current) {
       const currentScale = panzoomInstanceRef.current.getTransform().scale
       const newScale = currentScale / 1.2 // Zoom out by 20%
@@ -260,20 +260,20 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
         panzoomInstanceRef.current.zoomTo(centerX, centerY, newScale)
       }
     }
-  }
+  }, [])
 
   // Reset zoom and position
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     if (panzoomInstanceRef.current) {
       panzoomInstanceRef.current.moveTo(0, 0)
       panzoomInstanceRef.current.zoomAbs(0, 0, 1)
     }
-  }
+  }, [])
 
   // Toggle panning mode
-  const togglePanMode = () => {
+  const togglePanMode = useCallback(() => {
     setIsPanning(!isPanning)
-  }
+  }, [isPanning])
 
   return (
     <div className={`mermaid-wrapper ${className}`}>

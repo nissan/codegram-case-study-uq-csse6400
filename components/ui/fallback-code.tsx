@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { Copy, Check } from "lucide-react"
 
@@ -13,7 +13,7 @@ interface CodeProps {
 export function FallbackCode({ children, language = "javascript", className }: CodeProps) {
   const [copied, setCopied] = useState(false)
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = useCallback(async () => {
     if (navigator.clipboard && children) {
       try {
         await navigator.clipboard.writeText(children)
@@ -23,7 +23,7 @@ export function FallbackCode({ children, language = "javascript", className }: C
         console.error("Failed to copy text: ", err)
       }
     }
-  }
+  }, [children])
 
   return (
     <div className="relative group">
