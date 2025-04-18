@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
+import { FallbackCode } from "./fallback-code"
 
 interface CodeProps {
   children: string
@@ -10,95 +11,186 @@ interface CodeProps {
 }
 
 export function Code({ children, language = "javascript", className }: CodeProps) {
-  const [highlighted, setHighlighted] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const highlightInitialized = useRef(false)
+
+  // Map our language names to highlight.js language names
+  const getHighlightLanguage = (lang: string) => {
+    const languageMap: Record<string, string> = {
+      javascript: "javascript",
+      python: "python",
+      typescript: "typescript",
+      jsx: "javascript",
+      tsx: "typescript",
+      json: "json",
+      bash: "bash",
+      terraform: "plaintext", // Use plaintext for terraform
+      hcl: "plaintext", // Use plaintext for hcl
+    }
+    return languageMap[lang] || "plaintext"
+  }
 
   useEffect(() => {
-    // This is a simple syntax highlighting implementation
-    const highlightCode = () => {
-      let code = children
+    setMounted(true)
 
-      // Replace < and > with their HTML entities to prevent rendering as HTML
-      code = code.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    const initializeHighlight = async () => {
+      try {
+        // Add highlight.js CSS to the document head
+        const link = document.createElement("link")
+        link.rel = "stylesheet"
+        link.href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+        document.head.appendChild(link)
 
-      // Keywords
-      const keywords = [
-        "import",
-        "from",
-        "class",
-        "def",
-        "return",
-        "if",
-        "else",
-        "for",
-        "while",
-        "try",
-        "except",
-        "with",
-        "as",
-        "in",
-        "not",
-        "and",
-        "or",
-        "pass",
-        "None",
-        "True",
-        "False",
-        "async",
-        "await",
-        "function",
-        "const",
-        "let",
-        "var",
-        "resource",
-        "provider",
-        "module",
-        "output",
-        "data",
-        "FastAPI",
-        "app",
-      ]
+        // Load highlight.js script - use the complete version with all languages
+        const script = document.createElement("script")
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
+        script.async = true
 
-      // Replace keywords with spans
-      keywords.forEach((keyword) => {
-        const regex = new RegExp(`\\b${keyword}\\b`, "g")
-        code = code.replace(regex, `<span class="text-purple-500 dark:text-purple-400">${keyword}</span>`)
-      })
+        script.onload = () => {
+          // Once loaded, highlight all code blocks
+          // @ts-ignore - hljs is loaded from CDN
+          window.hljs.highlightAll()
+          highlightInitialized.current = true
+        }
 
-      // Strings
-      code = code.replace(/'([^']*)'/g, "<span class=\"text-green-600 dark:text-green-400\">'$1'</span>")
-      code = code.replace(/"([^"]*)"/g, '<span class="text-green-600 dark:text-green-400">"$1"</span>')
+        script.onerror = () => {
+          console.error("Failed to load highlight.js")
+          setLoadFailed(true)
+        }
 
-      // Comments
-      code = code.replace(/(#.*)$/gm, '<span class="text-gray-500">$1</span>')
-      code = code.replace(/(\/\/.*)$/gm, '<span class="text-gray-500">$1</span>')
+        document.body.appendChild(script)
 
-      // Numbers
-      code = code.replace(/\b(\d+)\b/g, '<span class="text-yellow-600 dark:text-yellow-400">$1</span>')
-
-      // Function calls
-      code = code.replace(/(\w+)\(/g, '<span class="text-blue-600 dark:text-blue-400">$1</span>(')
-
-      setHighlighted(code)
+        return () => {
+          // Clean up
+          if (document.head.contains(link)) {
+            document.head.removeChild(link)
+          }
+          if (document.body.contains(script)) {
+            document.body.removeChild(script)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load highlight.js:", error)
+        setLoadFailed(true)
+      }
     }
 
-    highlightCode()
-  }, [children])
+    initializeHighlight()
+  }, [])
+
+  useEffect(() => {
+    // Re-highlight when language or content changes
+    if (mounted && !loadFailed && highlightInitialized.current) {
+      // @ts-ignore - hljs is loaded from CDN
+      if (window.hljs) {
+        setTimeout(() => {
+          // @ts-ignore - hljs is loaded from CDN
+          window.hljs.highlightAll()
+        }, 0)
+      }
+    }
+  }, [children, language, mounted, loadFailed])
+
+  if (!mounted) {
+    // Return a placeholder while the component is mounting
+    return (
+      <div
+        className={cn(
+          "p-4 rounded-md bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 h-64",
+          className,
+        )}
+      >
+        <div className="animate-pulse h-full bg-gray-200 dark:bg-gray-800 rounded"></div>
+      </div>
+    )
+  }
+
+  // If loading failed, use the FallbackCode component
+  if (loadFailed) {
+    return (
+      <FallbackCode language={language} className={className}>
+        {children}
+      </FallbackCode>
+    )
+  }
+
+  // Apply our own styling on top of highlight.js
+  const codeStyle = `
+    .hljs {
+      background: transparent;
+      padding: 0;
+      color: #1e293b;
+    }
+    .dark .hljs {
+      color: #e2e8f0;
+    }
+    .hljs-comment, .hljs-quote {
+      color: #6b7280;
+      font-style: italic;
+    }
+    .dark .hljs-comment, .dark .hljs-quote {
+      color: #9ca3af;
+    }
+    .hljs-keyword, .hljs-selector-tag, .hljs-subst {
+      color: #8b5cf6;
+      font-weight: bold;
+    }
+    .dark .hljs-keyword, .dark .hljs-selector-tag, .dark .hljs-subst {
+      color: #a78bfa;
+    }
+    .hljs-string, .hljs-doctag, .hljs-regexp {
+      color: #10b981;
+    }
+    .dark .hljs-string, .dark .hljs-doctag, .dark .hljs-regexp {
+      color: #34d399;
+    }
+    .hljs-title, .hljs-section, .hljs-selector-id {
+      color: #3b82f6;
+      font-weight: bold;
+    }
+    .dark .hljs-title, .dark .hljs-section, .dark .hljs-selector-id {
+      color: #60a5fa;
+    }
+    .hljs-number, .hljs-literal, .hljs-variable, .hljs-template-variable, .hljs-tag .hljs-attr {
+      color: #f59e0b;
+    }
+    .dark .hljs-number, .dark .hljs-literal, .dark .hljs-variable, .dark .hljs-template-variable, .dark .hljs-tag .hljs-attr {
+      color: #fbbf24;
+    }
+    .hljs-symbol, .hljs-bullet {
+      color: #ec4899;
+    }
+    .dark .hljs-symbol, .dark .hljs-bullet {
+      color: #f472b6;
+    }
+    .hljs-meta {
+      color: #f97316;
+    }
+    .dark .hljs-meta {
+      color: #fb923c;
+    }
+    .hljs-emphasis {
+      font-style: italic;
+    }
+    .hljs-strong {
+      font-weight: bold;
+    }
+  `
+
+  const highlightLanguage = getHighlightLanguage(language)
 
   return (
-    <pre
-      className={cn(
-        "p-4 rounded-md bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 overflow-auto",
-        className,
-      )}
-    >
-      {highlighted ? (
-        <code
-          className="text-gray-800 dark:text-gray-200 font-mono text-sm"
-          dangerouslySetInnerHTML={{ __html: highlighted }}
-        />
-      ) : (
-        <code className="text-gray-800 dark:text-gray-200 font-mono text-sm">{children}</code>
-      )}
-    </pre>
+    <>
+      <style>{codeStyle}</style>
+      <pre
+        className={cn(
+          "p-4 rounded-md bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 overflow-auto",
+          className,
+        )}
+      >
+        <code className={`language-${highlightLanguage}`}>{children}</code>
+      </pre>
+    </>
   )
 }

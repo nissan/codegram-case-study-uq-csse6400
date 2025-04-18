@@ -1,7 +1,9 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Code } from "@/components/ui/code"
 import type { Filter } from "@/types/filter"
 
 interface CodeTabProps {
@@ -9,6 +11,12 @@ interface CodeTabProps {
 }
 
 export default function CodeTab({ filters }: CodeTabProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Generate sample pipeline code based on selected filters
   const generatePipelineCode = () => {
     const filterImports = filters
@@ -26,8 +34,7 @@ export default function CodeTab({ filters }: CodeTabProps) {
 
     const filterPipeline = filters.map((f) => `    image = ${f.name}_filter.apply(image)`).join("\n")
 
-    return `
-import cv2
+    return `import cv2
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
@@ -90,13 +97,11 @@ def encode_image_to_base64(image):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-`
+    uvicorn.run(app, host="0.0.0.0", port=8000)`
   }
 
-  // Update the sampleFilterCode to use async methods where appropriate
-  const sampleFilterCode = `
-import cv2
+  // Sample filter code
+  const sampleFilterCode = `import cv2
 import numpy as np
 from typing import Dict, Any
 
@@ -138,12 +143,10 @@ class BlurFilter:
         
     def apply(self, image):
         # Apply Gaussian blur
-        return cv2.GaussianBlur(image, (self.radius*2+1, self.radius*2+1), 0)
-`
+        return cv2.GaussianBlur(image, (self.radius*2+1, self.radius*2+1), 0)`
 
-  // Update the sampleRequestCode to use the FastAPI endpoint
-  const sampleRequestCode = `
-// Example API request using fetch
+  // Sample request code
+  const sampleRequestCode = `// Example API request using fetch
 const applyFilters = async (imageUrl, filters) => {
   try {
     const response = await fetch('https://api.codegram.dev/filter', {
@@ -181,12 +184,10 @@ const filters = ${JSON.stringify(
     2,
   )};
 
-applyFilters('https://example.com/code-snippet.jpg', filters);
-`
+applyFilters('https://example.com/code-snippet.jpg', filters);`
 
-  // Update the terraformCode to use FastAPI instead of Flask
-  const terraformCode = `
-# ECS Fargate Service for Codegram API
+  // Terraform code
+  const terraformCode = `# ECS Fargate Service for Codegram API
 
 provider "aws" {
   region = "us-west-2"
@@ -404,21 +405,21 @@ resource "aws_cloudfront_distribution" "codegram_cdn" {
 # CloudFront Origin Access Identity
 resource "aws_cloudfront_origin_access_identity" "codegram" {
   comment = "OAI for Codegram image cache"
-}
-`
+}`
 
-  // Function to determine language class for syntax highlighting
-  const getLanguageClass = (language: string) => {
-    switch (language) {
-      case "python":
-        return "language-python"
-      case "javascript":
-        return "language-javascript"
-      case "hcl":
-        return "language-hcl"
-      default:
-        return "language-plaintext"
-    }
+  if (!mounted) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-1/3"></div>
+              <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -455,30 +456,22 @@ resource "aws_cloudfront_origin_access_identity" "codegram" {
 
             <TabsContent value="pipeline">
               <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">FastAPI Backend</h3>
-              <pre className="bg-gray-50 dark:bg-gray-950 p-4 rounded-md border border-gray-200 dark:border-gray-800 overflow-auto text-sm font-mono">
-                {generatePipelineCode()}
-              </pre>
+              <Code language="python">{generatePipelineCode()}</Code>
             </TabsContent>
 
             <TabsContent value="filters">
               <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Filter Implementations</h3>
-              <pre className="bg-gray-50 dark:bg-gray-950 p-4 rounded-md border border-gray-200 dark:border-gray-800 overflow-auto text-sm font-mono">
-                {sampleFilterCode}
-              </pre>
+              <Code language="python">{sampleFilterCode}</Code>
             </TabsContent>
 
             <TabsContent value="request">
               <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">JavaScript API Client</h3>
-              <pre className="bg-gray-50 dark:bg-gray-950 p-4 rounded-md border border-gray-200 dark:border-gray-800 overflow-auto text-sm font-mono">
-                {sampleRequestCode}
-              </pre>
+              <Code language="javascript">{sampleRequestCode}</Code>
             </TabsContent>
 
             <TabsContent value="terraform">
               <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Infrastructure as Code</h3>
-              <pre className="bg-gray-50 dark:bg-gray-950 p-4 rounded-md border border-gray-200 dark:border-gray-800 overflow-auto text-sm font-mono">
-                {terraformCode}
-              </pre>
+              <Code language="terraform">{terraformCode}</Code>
             </TabsContent>
           </Tabs>
         </CardContent>
