@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import HomeTab from "@/components/home-tab"
 import ArchitectureTab from "@/components/architecture-tab"
 import CodeTab from "@/components/code-tab"
@@ -69,29 +68,41 @@ export default function CodegramApp() {
             <ThemeToggle />
           </header>
 
-          <Tabs defaultValue="home" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-200 dark:bg-gray-800">
-              <TabsTrigger
-                value="home"
-                className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
+          <div className="mb-8">
+            <div className="grid w-full grid-cols-3 mb-8 bg-gray-200 dark:bg-gray-800 rounded-md">
+              <button
+                onClick={() => setActiveTab("home")}
+                className={`py-2 text-center text-sm font-medium transition-colors ${
+                  activeTab === "home"
+                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-t-md"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
               >
                 Home
-              </TabsTrigger>
-              <TabsTrigger
-                value="architecture"
-                className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
+              </button>
+              <button
+                onClick={() => setActiveTab("architecture")}
+                className={`py-2 text-center text-sm font-medium transition-colors ${
+                  activeTab === "architecture"
+                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
               >
                 Architecture
-              </TabsTrigger>
-              <TabsTrigger
-                value="code"
-                className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
+              </button>
+              <button
+                onClick={() => setActiveTab("code")}
+                className={`py-2 text-center text-sm font-medium transition-colors ${
+                  activeTab === "code"
+                    ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-t-md"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
               >
                 Code
-              </TabsTrigger>
-            </TabsList>
+              </button>
+            </div>
 
-            <TabsContent value="home">
+            {activeTab === "home" && (
               <HomeTab
                 selectedImage={selectedImage}
                 setSelectedImage={setSelectedImage}
@@ -100,16 +111,12 @@ export default function CodegramApp() {
                 onFilterReorder={handleFilterReorder}
                 onFilterParamChange={handleFilterParamChange}
               />
-            </TabsContent>
+            )}
 
-            <TabsContent value="architecture">
-              <ArchitectureTab />
-            </TabsContent>
+            {activeTab === "architecture" && <ArchitectureTab />}
 
-            <TabsContent value="code">
-              <CodeTab filters={filters.filter((f) => f.enabled)} />
-            </TabsContent>
-          </Tabs>
+            {activeTab === "code" && <CodeTab filters={filters.filter((f) => f.enabled)} />}
+          </div>
         </div>
       </div>
     </ThemeProvider>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { FallbackCode } from "./fallback-code"
+import { Copy, Check } from "lucide-react"
 
 interface CodeProps {
   children: string
@@ -13,7 +14,9 @@ interface CodeProps {
 export function Code({ children, language = "javascript", className }: CodeProps) {
   const [mounted, setMounted] = useState(false)
   const [loadFailed, setLoadFailed] = useState(false)
+  const [copied, setCopied] = useState(false)
   const highlightInitialized = useRef(false)
+  const codeRef = useRef<HTMLPreElement>(null)
 
   // Map our language names to highlight.js language names
   const getHighlightLanguage = (lang: string) => {
@@ -91,6 +94,18 @@ export function Code({ children, language = "javascript", className }: CodeProps
       }
     }
   }, [children, language, mounted, loadFailed])
+
+  const copyToClipboard = async () => {
+    if (navigator.clipboard && children) {
+      try {
+        await navigator.clipboard.writeText(children)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch (err) {
+        console.error("Failed to copy text: ", err)
+      }
+    }
+  }
 
   if (!mounted) {
     // Return a placeholder while the component is mounting
@@ -183,14 +198,25 @@ export function Code({ children, language = "javascript", className }: CodeProps
   return (
     <>
       <style>{codeStyle}</style>
-      <pre
-        className={cn(
-          "p-4 rounded-md bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 overflow-auto",
-          className,
-        )}
-      >
-        <code className={`language-${highlightLanguage}`}>{children}</code>
-      </pre>
+      <div className="relative group">
+        <pre
+          ref={codeRef}
+          className={cn(
+            "p-4 rounded-md bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 overflow-auto",
+            className,
+          )}
+        >
+          <code className={`language-${highlightLanguage}`}>{children}</code>
+        </pre>
+        <button
+          onClick={copyToClipboard}
+          className="absolute top-2 right-2 p-2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 transition-opacity opacity-0 group-hover:opacity-100"
+          aria-label="Copy code"
+          title="Copy code"
+        >
+          {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+        </button>
+      </div>
     </>
   )
 }

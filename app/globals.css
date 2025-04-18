@@ -269,3 +269,28 @@ code {
   pointer-events: none !important;
   z-index: -9999 !important;
 }
+
+/* Make copy button visible on touch devices */
+@media (hover: none) {
+  .group:hover .opacity-0 {
+    opacity: 1;
+  }
+
+  pre:hover + button,
+  pre:focus-within + button,
+  pre:active + button {
+    opacity: 1;
+  }
+}
+
+/* Always show copy button when code block is focused */
+pre:focus-within + button {
+  opacity: 1;
+}
+
+/* Make copy button more visible on small screens */
+@media (max-width: 640px) {
+  .group .opacity-0 {
+    opacity: 0.7;
+  }
+}

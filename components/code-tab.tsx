@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Code } from "@/components/ui/code"
 import type { Filter } from "@/types/filter"
 
@@ -12,6 +11,7 @@ interface CodeTabProps {
 
 export default function CodeTab({ filters }: CodeTabProps) {
   const [mounted, setMounted] = useState(false)
+  const [activeTab, setActiveTab] = useState("pipeline")
 
   useEffect(() => {
     setMounted(true)
@@ -407,6 +407,153 @@ resource "aws_cloudfront_origin_access_identity" "codegram" {
   comment = "OAI for Codegram image cache"
 }`
 
+  // Updated C4 Model DSL for Structurizr - Fixed deployment view reference
+  const c4ModelCode = `workspace {
+    name "Codegram Filter Pipeline"
+    description "C4 model for the Codegram image filter pipeline architecture"
+
+    model {
+        user = person "User" "A programmer who wants to share code screenshots"
+        
+        group "Codegram" {
+            codegramSystem = softwareSystem "Codegram Platform" "Social media platform for programmers to share code screenshots" {
+                webapp = container "Web Application" "Provides the Codegram UI and user experience" "React, Next.js" {
+                    filterUI = component "Filter UI" "Allows users to select and configure image filters" "React Components"
+                    imagePreview = component "Image Preview" "Shows original and processed images" "React Components"
+                    apiClient = component "API Client" "Communicates with the Filter API" "JavaScript, Fetch API"
+                }
+                
+                filterAPI = container "Filter API" "Processes images with selected filters" "FastAPI, Python" {
+                    apiEndpoints = component "API Endpoints" "Exposes RESTful endpoints for image processing" "FastAPI Routes"
+                    imageLoader = component "Image Loader" "Loads images from URLs or file uploads" "Python, httpx"
+                    filterPipeline = component "Filter Pipeline" "Applies filters in sequence" "Python"
+                    grayscaleFilter = component "Grayscale Filter" "Converts image to grayscale" "OpenCV"
+                    brightnessFilter = component "Brightness Filter" "Adjusts image brightness" "OpenCV"
+                    contrastFilter = component "Contrast Filter" "Adjusts image contrast" "OpenCV"
+                    blurFilter = component "Blur Filter" "Applies Gaussian blur" "OpenCV"
+                    sharpenFilter = component "Sharpen Filter" "Enhances image details" "OpenCV"
+                }
+                
+                imageCache = container "Image Cache" "Stores processed images" "Amazon S3"
+                cdn = container "Content Delivery Network" "Distributes processed images globally" "CloudFront"
+                database = container "Analytics Database" "Stores filter usage statistics" "Amazon RDS, PostgreSQL"
+            }
+            
+            deploymentEnvironment = deploymentEnvironment "AWS Cloud" {
+                deploymentNode "AWS Region" {
+                    deploymentNode "VPC" {
+                        deploymentNode "Public Subnet" {
+                            loadBalancerInstance = infrastructureNode "Application Load Balancer" "Routes traffic to ECS tasks"
+                            cdnInstance = infrastructureNode "CloudFront Distribution" "Serves cached images"
+                        }
+                        
+                        deploymentNode "Private Subnet" {
+                            deploymentNode "ECS Cluster" {
+                                ecsService = infrastructureNode "ECS Fargate Service" "Runs the Filter API containers"
+                                
+                                deploymentNode "ECS Task" "Filter API Container" {
+                                    filterApiInstance = containerInstance filterAPI
+                                }
+                            }
+                            
+                            deploymentNode "Database Subnet" {
+                                rdsInstance = infrastructureNode "RDS Instance" "Runs the PostgreSQL database"
+                            }
+                        }
+                    }
+                    
+                    deploymentNode "S3" {
+                        s3Instance = infrastructureNode "S3 Bucket" "Stores processed images"
+                    }
+                    
+                    deploymentNode "ECR" {
+                        ecrInstance = infrastructureNode "ECR Repository" "Stores Docker images"
+                    }
+                }
+            }
+        }
+        
+        # Relationships
+        user -> webapp "Uses"
+        webapp -> filterAPI "Sends image processing requests to" "HTTPS"
+        filterAPI -> imageCache "Stores processed images in" "AWS SDK"
+        imageCache -> cdn "Distributes images via"
+        filterAPI -> database "Logs filter usage to" "SQL"
+        
+        # Component relationships
+        filterUI -> apiClient "Uses"
+        apiClient -> apiEndpoints "Sends requests to" "HTTPS"
+        apiEndpoints -> imageLoader "Uses"
+        apiEndpoints -> filterPipeline "Uses"
+        filterPipeline -> grayscaleFilter "Uses when enabled"
+        filterPipeline -> brightnessFilter "Uses when enabled"
+        filterPipeline -> contrastFilter "Uses when enabled"
+        filterPipeline -> blurFilter "Uses when enabled"
+        filterPipeline -> sharpenFilter "Uses when enabled"
+        
+        # Deployment relationships
+        loadBalancerInstance -> ecsService "Routes traffic to"
+        ecsService -> filterApiInstance "Runs"
+        filterApiInstance -> rdsInstance "Connects to"
+        filterApiInstance -> s3Instance "Stores images in"
+        s3Instance -> cdnInstance "Origin for"
+    }
+    
+    views {
+        systemContext codegramSystem "SystemContext" {
+            include *
+            autoLayout
+        }
+        
+        container codegramSystem "Containers" {
+            include *
+            autoLayout
+        }
+        
+        component filterAPI "FilterAPIComponents" {
+            include *
+            autoLayout
+        }
+        
+        component webapp "WebAppComponents" {
+            include *
+            autoLayout
+        }
+        
+        deployment codegramSystem "AWS Cloud" {
+            include *
+            autoLayout
+        }
+        
+        theme default
+        
+        styles {
+            element "Person" {
+                shape Person
+                background #08427B
+                color #ffffff
+            }
+            element "Software System" {
+                background #1168BD
+                color #ffffff
+            }
+            element "Container" {
+                background #438DD5
+                color #ffffff
+            }
+            element "Component" {
+                background #85BBF0
+                color #000000
+            }
+            element "Infrastructure Node" {
+                shape Hexagon
+                background #999999
+                color #ffffff
+            }
+        }
+    }
+}`
+
   if (!mounted) {
     return (
       <div className="space-y-6">
@@ -426,54 +573,112 @@ resource "aws_cloudfront_origin_access_identity" "codegram" {
     <div className="space-y-6">
       <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
         <CardContent className="p-6">
-          <Tabs defaultValue="pipeline">
-            <TabsList className="grid w-full grid-cols-4 mb-4 bg-gray-100 dark:bg-gray-800">
-              <TabsTrigger
-                value="pipeline"
-                className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
-              >
-                Pipeline Code
-              </TabsTrigger>
-              <TabsTrigger
-                value="filters"
-                className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
-              >
-                Filter Implementation
-              </TabsTrigger>
-              <TabsTrigger
-                value="request"
-                className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
-              >
-                API Request
-              </TabsTrigger>
-              <TabsTrigger
-                value="terraform"
-                className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
-              >
-                Terraform
-              </TabsTrigger>
-            </TabsList>
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Code Examples</h3>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setActiveTab("pipeline")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                    activeTab === "pipeline"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  Pipeline
+                </button>
+                <button
+                  onClick={() => setActiveTab("filters")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                    activeTab === "filters"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  Filters
+                </button>
+                <button
+                  onClick={() => setActiveTab("request")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                    activeTab === "request"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  API Request
+                </button>
+                <button
+                  onClick={() => setActiveTab("terraform")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                    activeTab === "terraform"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  Terraform
+                </button>
+                <button
+                  onClick={() => setActiveTab("c4model")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                    activeTab === "c4model"
+                      ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  C4 Model
+                </button>
+              </div>
+            </div>
 
-            <TabsContent value="pipeline">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">FastAPI Backend</h3>
-              <Code language="python">{generatePipelineCode()}</Code>
-            </TabsContent>
+            {activeTab === "pipeline" && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">FastAPI Backend</h3>
+                <Code language="python">{generatePipelineCode()}</Code>
+              </div>
+            )}
 
-            <TabsContent value="filters">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Filter Implementations</h3>
-              <Code language="python">{sampleFilterCode}</Code>
-            </TabsContent>
+            {activeTab === "filters" && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Filter Implementations</h3>
+                <Code language="python">{sampleFilterCode}</Code>
+              </div>
+            )}
 
-            <TabsContent value="request">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">JavaScript API Client</h3>
-              <Code language="javascript">{sampleRequestCode}</Code>
-            </TabsContent>
+            {activeTab === "request" && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">JavaScript API Client</h3>
+                <Code language="javascript">{sampleRequestCode}</Code>
+              </div>
+            )}
 
-            <TabsContent value="terraform">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Infrastructure as Code</h3>
-              <Code language="terraform">{terraformCode}</Code>
-            </TabsContent>
-          </Tabs>
+            {activeTab === "terraform" && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Infrastructure as Code</h3>
+                <Code language="terraform">{terraformCode}</Code>
+              </div>
+            )}
+
+            {activeTab === "c4model" && (
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">C4 Model DSL for Structurizr</h3>
+                  <a
+                    href="https://structurizr.com/dsl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Open Structurizr DSL Editor
+                  </a>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Copy this code into the Structurizr DSL editor to visualize the C4 model for the Codegram
+                  architecture. The model includes context, container, component, and deployment diagrams.
+                </p>
+                <Code language="javascript">{c4ModelCode}</Code>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
