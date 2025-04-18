@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import MermaidDiagram from "./mermaid-diagram"
 import FallbackDiagram from "./fallback-diagram"
 import StaticDiagram from "./static-diagram"
+import MermaidScript from "./mermaid-script"
 import { AlertTriangle, Info } from "lucide-react"
 
 export default function ArchitectureTab() {
@@ -14,6 +15,7 @@ export default function ArchitectureTab() {
 
   // Updated Mermaid syntax with proper formatting to avoid list interpretation
   // Made the diagrams more detailed for better visualization when zoomed in
+  // Ensure no line starts with a dash, asterisk, or plus followed by a space
   const pipelineArchitecture = `
 graph LR
   A["Client Browser"] -->|HTTP Request| B["FastAPI Server"]
@@ -86,6 +88,9 @@ graph TD
 
   return (
     <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
+      {/* Include the MermaidScript component to ensure "Unsupported markdown: list" text is removed */}
+      <MermaidScript />
+
       <CardContent className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">System Architecture</h2>

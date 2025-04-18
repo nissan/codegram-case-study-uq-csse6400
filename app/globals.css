@@ -124,14 +124,42 @@
   padding: 20px;
 }
 
-/* Fix for the "Unsupported markdown: list" issue */
+/* Super aggressive fix for the "Unsupported markdown: list" issue */
+/* Hide any text containing "Unsupported markdown" */
+.mermaid text,
+.mermaid [class*="flowchart-label"],
+.mermaid [class*="label"],
+.mermaid [class*="text"] {
+  font-family: monospace !important;
+}
+
+.mermaid text:not(:empty),
+.mermaid [class*="flowchart-label"]:not(:empty),
+.mermaid [class*="label"]:not(:empty),
+.mermaid [class*="text"]:not(:empty) {
+  visibility: visible;
+}
+
+/* Hide any text containing "Unsupported markdown" */ \
+.mermaid text:has(tspan:contains("Unsupported markdown")),
+.mermaid text[dominant-baseline="text-before-edge"]:contains("Unsupported markdown"),
+.mermaid text:contains("Unsupported markdown"),
+.mermaid tspan:contains("Unsupported markdown"),
 .mermaid .list-marker,
-\
-.mermaid text:contains("Unsupported markdown: list"),
-.mermaid text[dominant-baseline="text-before-edge"]:contains("Unsupported markdown") {
+.mermaid .error-icon,
+.mermaid .error-text,
+.mermaid .error-message,
+.mermaid [class*="error"],
+.mermaid [id*="error"] {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
 }
 
 /* Make sure SVG takes full space */
@@ -216,4 +244,28 @@ code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.875rem;
   white-space: pre;
+}
+
+/* Additional script to remove "Unsupported markdown: list" text */
+@keyframes hideUnsupportedMarkdown {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* This will be injected via JavaScript to ensure it works in production */
+.hide-unsupported-markdown {
+  animation: hideUnsupportedMarkdown 0.1s forwards;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
 }

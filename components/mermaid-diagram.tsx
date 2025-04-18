@@ -54,6 +54,35 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
     }
   }
 
+  // Function to remove "Unsupported markdown: list" text nodes
+  const removeUnsupportedMarkdownText = () => {
+    if (!containerRef.current) return
+
+    // Find all text nodes in the SVG
+    const textElements = containerRef.current.querySelectorAll("text")
+
+    textElements.forEach((textElement) => {
+      if (textElement.textContent?.includes("Unsupported markdown")) {
+        // Option 1: Remove the entire text element
+        textElement.remove()
+
+        // Option 2: Hide the text element
+        // textElement.style.display = "none"
+        // textElement.style.visibility = "hidden"
+        // textElement.style.opacity = "0"
+
+        // Option 3: Replace the text content
+        // textElement.textContent = ""
+      }
+    })
+
+    // Also try to find and remove any elements with the class "list-marker"
+    const listMarkers = containerRef.current.querySelectorAll(".list-marker")
+    listMarkers.forEach((marker) => {
+      marker.remove()
+    })
+  }
+
   useEffect(() => {
     // We need to dynamically import mermaid to avoid SSR issues
     const renderDiagram = async () => {
@@ -130,15 +159,27 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
         // Initialize panzoom
         await initPanzoom()
 
-        // Hide any "Unsupported markdown: list" messages that might still appear
+        // Remove "Unsupported markdown: list" text immediately after rendering
+        removeUnsupportedMarkdownText()
+
+        // Set up a MutationObserver to continuously check for and remove the unwanted text
+        const observer = new MutationObserver(() => {
+          removeUnsupportedMarkdownText()
+        })
+
+        // Start observing the container for changes
         if (containerRef.current) {
-          const unsupportedMessages = containerRef.current.querySelectorAll(".list-marker")
-          unsupportedMessages.forEach((el) => {
-            ;(el as HTMLElement).style.display = "none"
+          observer.observe(containerRef.current, {
+            childList: true,
+            subtree: true,
+            characterData: true,
           })
         }
 
-        setRenderError(null)
+        // Add a cleanup function to disconnect the observer
+        return () => {
+          observer.disconnect()
+        }
       } catch (error) {
         console.error("Failed to render mermaid diagram:", error)
         setRenderError(error instanceof Error ? error.message : String(error))
