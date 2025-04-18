@@ -26,26 +26,32 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
       panzoomInstanceRef.current.dispose()
     }
 
-    // Dynamically import panzoom
-    const panzoom = (await import("panzoom")).default
+    try {
+      // Dynamically import panzoom
+      const panzoomModule = await import("panzoom")
+      const panzoom = panzoomModule.default
 
-    // Initialize panzoom on the diagram container
-    panzoomInstanceRef.current = panzoom(diagramRef.current, {
-      maxZoom: 4,
-      minZoom: 0.5,
-      bounds: true,
-      boundsPadding: 0.1,
-      smoothScroll: false,
-    })
+      // Initialize panzoom on the diagram container
+      panzoomInstanceRef.current = panzoom(diagramRef.current, {
+        maxZoom: 4,
+        minZoom: 0.5,
+        bounds: true,
+        boundsPadding: 0.1,
+        smoothScroll: false,
+      })
 
-    // Update zoom state when zooming
-    panzoomInstanceRef.current.on("zoom", (e: any) => {
-      setZoom(e.getTransform().scale)
-    })
+      // Update zoom state when zooming
+      panzoomInstanceRef.current.on("zoom", (e: any) => {
+        setZoom(e.getTransform().scale)
+      })
 
-    // Reset zoom to 1
-    panzoomInstanceRef.current.zoomAbs(0, 0, 1)
-    setZoom(1)
+      // Reset zoom to 1
+      panzoomInstanceRef.current.moveTo(0, 0)
+      panzoomInstanceRef.current.zoomAbs(0, 0, 1)
+      setZoom(1)
+    } catch (error) {
+      console.error("Failed to initialize panzoom:", error)
+    }
   }
 
   useEffect(() => {
@@ -56,7 +62,7 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
 
         // Clear previous content and show loading state
         containerRef.current.innerHTML = `
-          <div class="flex items-center justify-center p-4">
+          <div class="flex items-center justify-center p-4 w-full h-full">
             <div class="animate-pulse text-gray-500 dark:text-gray-400">Loading diagram...</div>
           </div>
         `
@@ -75,6 +81,7 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
             htmlLabels: true,
             useMaxWidth: false, // Important for zooming
             curve: "basis",
+            diagramPadding: 8,
           },
         })
 
@@ -90,9 +97,9 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
 
         // Create a wrapper div for panzoom
         containerRef.current.innerHTML = `
-          <div class="diagram-wrapper relative overflow-hidden border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900">
-            <div id="diagram-container-${id}" class="diagram-container" style="transform-origin: 0 0;">
-              <div id="${id}" class="mermaid"></div>
+          <div class="diagram-wrapper relative overflow-hidden border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 w-full h-full">
+            <div id="diagram-container-${id}" class="diagram-container w-full h-full" style="transform-origin: 0 0;">
+              <div id="${id}" class="mermaid w-full h-full"></div>
             </div>
           </div>
         `
@@ -161,17 +168,39 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
     }
   }, [chart])
 
-  // Zoom in function
+  // Zoom in function - using the correct panzoom API
   const handleZoomIn = () => {
     if (panzoomInstanceRef.current) {
-      panzoomInstanceRef.current.zoomIn()
+      const currentScale = panzoomInstanceRef.current.getTransform().scale
+      const newScale = currentScale * 1.2 // Zoom in by 20%
+
+      // Get the center of the viewport
+      const containerRect = containerRef.current?.getBoundingClientRect()
+      if (containerRect) {
+        const centerX = containerRect.width / 2
+        const centerY = containerRect.height / 2
+
+        // Zoom to the new scale at the center point
+        panzoomInstanceRef.current.zoomTo(centerX, centerY, newScale)
+      }
     }
   }
 
-  // Zoom out function
+  // Zoom out function - using the correct panzoom API
   const handleZoomOut = () => {
     if (panzoomInstanceRef.current) {
-      panzoomInstanceRef.current.zoomOut()
+      const currentScale = panzoomInstanceRef.current.getTransform().scale
+      const newScale = currentScale / 1.2 // Zoom out by 20%
+
+      // Get the center of the viewport
+      const containerRect = containerRef.current?.getBoundingClientRect()
+      if (containerRect) {
+        const centerX = containerRect.width / 2
+        const centerY = containerRect.height / 2
+
+        // Zoom to the new scale at the center point
+        panzoomInstanceRef.current.zoomTo(centerX, centerY, newScale)
+      }
     }
   }
 
@@ -190,10 +219,10 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
 
   return (
     <div className={`mermaid-wrapper ${className}`}>
-      <div className="relative">
+      <div className="relative w-full h-[500px]">
         <div
           ref={containerRef}
-          className="mermaid-container min-h-[400px] flex items-center justify-center"
+          className="mermaid-container w-full h-full flex items-center justify-center"
           aria-live="polite"
         ></div>
 

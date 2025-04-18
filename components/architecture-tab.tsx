@@ -122,7 +122,7 @@ graph TD
           </div>
         </div>
 
-        <div className="mb-4 overflow-auto bg-gray-50 dark:bg-gray-950 rounded-md border border-gray-200 dark:border-gray-800">
+        <div className="mb-4 overflow-hidden bg-gray-50 dark:bg-gray-950 rounded-md border border-gray-200 dark:border-gray-800">
           {displayMode === "fallback" ? (
             view === "pipeline" ? (
               <FallbackDiagram
