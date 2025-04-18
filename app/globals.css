@@ -294,3 +294,15 @@ pre:focus-within + button {
     opacity: 0.7;
   }
 }
+
+/* Mermaid syntax section */
+.mermaid-syntax-section {
+  position: relative;
+}
+
+.mermaid-syntax-section .copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+}

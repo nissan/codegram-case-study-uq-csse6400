@@ -1,17 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import MermaidDiagram from "./mermaid-diagram"
 import FallbackDiagram from "./fallback-diagram"
 import StaticDiagram from "./static-diagram"
 import MermaidScript from "./mermaid-script"
-import { AlertTriangle, Info } from "lucide-react"
+import { AlertTriangle, Info, ExternalLink, Copy, Check } from "lucide-react"
+import { Code } from "@/components/ui/code"
 
 export default function ArchitectureTab() {
   const [view, setView] = useState("pipeline")
   const [displayMode, setDisplayMode] = useState<"mermaid" | "fallback" | "static">("mermaid")
+  const [showRawSyntax, setShowRawSyntax] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  // Ensure syntax highlighting is reapplied when switching tabs
+  useEffect(() => {
+    // Force re-render of the Code component when view changes
+    if (showRawSyntax) {
+      // Small timeout to ensure the DOM has updated
+      const timer = setTimeout(() => {
+        // @ts-ignore - hljs is loaded from CDN
+        if (window.hljs) {
+          const codeElements = document.querySelectorAll("pre code")
+          if (codeElements.length > 0) {
+            codeElements.forEach((block) => {
+              // @ts-ignore - hljs is loaded from CDN
+              window.hljs.highlightElement(block)
+            })
+          }
+        }
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [view, showRawSyntax])
 
   // Updated Mermaid syntax with proper formatting to avoid list interpretation
   // Made the diagrams more detailed for better visualization when zoomed in
@@ -86,13 +110,28 @@ graph TD
     else setDisplayMode("mermaid")
   }
 
+  const copyToClipboard = async (text: string) => {
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(text)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } catch (err) {
+        console.error("Failed to copy text: ", err)
+      }
+    }
+  }
+
+  const currentDiagramSyntax = view === "pipeline" ? pipelineArchitecture : cloudArchitecture
+  const diagramTitle = view === "pipeline" ? "Image Processing Pipeline" : "AWS Cloud Deployment Architecture"
+
   return (
     <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
       {/* Include the MermaidScript component to ensure "Unsupported markdown: list" text is removed */}
       <MermaidScript />
 
       <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">System Architecture</h2>
 
           <div className="flex items-center gap-4">
@@ -126,6 +165,70 @@ graph TD
             </Tabs>
           </div>
         </div>
+
+        {/* Toggle button for showing raw syntax - Moved to be right after the heading */}
+        <div className="mb-4">
+          <button
+            onClick={() => setShowRawSyntax(!showRawSyntax)}
+            className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          >
+            {showRawSyntax ? "Hide Mermaid Syntax" : "Show Mermaid Syntax"}
+            <span className="text-xs text-gray-500 dark:text-gray-400">(for use with mermaid.live)</span>
+          </button>
+        </div>
+
+        {/* Raw Mermaid Syntax Section */}
+        {showRawSyntax && (
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mermaid Diagram Syntax</h3>
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://mermaid.live"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Open in Mermaid Live Editor
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <button
+                  onClick={() => copyToClipboard(currentDiagramSyntax)}
+                  className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                  aria-label="Copy Mermaid syntax"
+                  title="Copy Mermaid syntax"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 text-green-500" />
+                      <span className="text-green-500">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3.5 w-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-950 rounded-md border border-gray-200 dark:border-gray-800 p-4">
+              <Code language="javascript">{currentDiagramSyntax}</Code>
+            </div>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              Copy this Mermaid syntax and paste it into{" "}
+              <a
+                href="https://mermaid.live"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                mermaid.live
+              </a>{" "}
+              to edit or customize the diagram.
+            </p>
+          </div>
+        )}
 
         <div className="mb-4 overflow-hidden bg-gray-50 dark:bg-gray-950 rounded-md border border-gray-200 dark:border-gray-800">
           {displayMode === "fallback" ? (
