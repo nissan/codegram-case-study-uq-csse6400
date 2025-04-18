@@ -7,6 +7,8 @@ import CodeTab from "@/components/code-tab"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ThemeToggle } from "@/components/theme-toggle"
 import type { Filter } from "@/types/filter"
+import DebugReact from "@/components/debug-react"
+import SearchForUseEffectEvent from "@/components/search-for-use-effect-event"
 
 export default function CodegramApp() {
   const [activeTab, setActiveTab] = useState("home")
@@ -19,6 +21,7 @@ export default function CodegramApp() {
     { id: "5", name: "sharpen", enabled: false, params: { amount: 50 } },
   ])
   const [mounted, setMounted] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
 
   // Ensure theme is applied after hydration
   useEffect(() => {
@@ -65,8 +68,23 @@ export default function CodegramApp() {
               <h1 className="text-4xl font-bold mb-2">Codegram Filter UI</h1>
               <p className="text-gray-600 dark:text-gray-400">Developer tool for image filter pipeline</p>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowDebug(!showDebug)}
+                className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md"
+              >
+                {showDebug ? "Hide Debug" : "Show Debug"}
+              </button>
+              <ThemeToggle />
+            </div>
           </header>
+
+          {showDebug && (
+            <div className="mb-6 space-y-4">
+              <DebugReact />
+              <SearchForUseEffectEvent />
+            </div>
+          )}
 
           <div className="mb-8">
             <div className="grid w-full grid-cols-3 mb-8 bg-gray-200 dark:bg-gray-800 rounded-md">
