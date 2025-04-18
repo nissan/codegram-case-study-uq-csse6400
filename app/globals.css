@@ -125,8 +125,13 @@
 }
 
 /* Fix for the "Unsupported markdown: list" issue */
-.mermaid .list-marker {
+.mermaid .list-marker,
+\
+.mermaid text:contains("Unsupported markdown: list"),
+.mermaid text[dominant-baseline="text-before-edge"]:contains("Unsupported markdown") {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 /* Make sure SVG takes full space */

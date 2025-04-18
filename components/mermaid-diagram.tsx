@@ -86,11 +86,20 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
         })
 
         // Sanitize the chart definition to prevent markdown list interpretation
+        // Replace any line that starts with a dash, asterisk, or plus followed by a space
+        // with the same character but without triggering markdown list interpretation
         const sanitizedChart = chart
           .split("\n")
-          .map((line) => line.trim())
+          .map((line) => {
+            // Trim the line and check if it starts with a list marker
+            const trimmedLine = line.trim()
+            if (/^[-*+]\s/.test(trimmedLine)) {
+              // Replace the space after the list marker with a non-breaking space
+              return line.replace(/^(\s*[-*+])\s/, "$1\u00A0")
+            }
+            return line
+          })
           .join("\n")
-          .replace(/^\s*[-*+]\s/gm, "") // Remove markdown list markers
 
         // Create a unique ID for this diagram
         const id = `mermaid-${Math.random().toString(36).substring(2, 11)}`
@@ -120,6 +129,14 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
 
         // Initialize panzoom
         await initPanzoom()
+
+        // Hide any "Unsupported markdown: list" messages that might still appear
+        if (containerRef.current) {
+          const unsupportedMessages = containerRef.current.querySelectorAll(".list-marker")
+          unsupportedMessages.forEach((el) => {
+            ;(el as HTMLElement).style.display = "none"
+          })
+        }
 
         setRenderError(null)
       } catch (error) {
