@@ -78,19 +78,51 @@
 /* Improved readability for Mermaid diagrams */
 .mermaid-wrapper {
   width: 100%;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .mermaid-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 400px;
+  width: 100%;
+  position: relative;
+}
+
+/* Diagram wrapper for panzoom */
+.diagram-wrapper {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+}
+
+.diagram-wrapper:active {
+  cursor: grabbing;
+}
+
+/* Container for the actual diagram */
+.diagram-container {
+  position: absolute;
+  min-width: 100%;
+  min-height: 100%;
 }
 
 /* Basic mermaid styling */
 .mermaid {
   width: 100%;
   overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Fix for the "Unsupported markdown: list" issue */
+.mermaid .list-marker {
+  display: none !important;
 }
 
 /* Light mode styles */

@@ -6,42 +6,76 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import MermaidDiagram from "./mermaid-diagram"
 import FallbackDiagram from "./fallback-diagram"
 import StaticDiagram from "./static-diagram"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, Info } from "lucide-react"
 
 export default function ArchitectureTab() {
   const [view, setView] = useState("pipeline")
   const [displayMode, setDisplayMode] = useState<"mermaid" | "fallback" | "static">("mermaid")
 
-  // Simplified Mermaid syntax
+  // Updated Mermaid syntax with proper formatting to avoid list interpretation
+  // Made the diagrams more detailed for better visualization when zoomed in
   const pipelineArchitecture = `
 graph LR
-  A[Client Browser] -->|HTTP Request| B[FastAPI]
-  B -->|1. Load Image| C[Image Loader]
-  C -->|2. Apply Filters| D[Filter Pipeline]
-  D -->|Grayscale| E[Grayscale Filter]
-  D -->|Brightness| F[Brightness Filter]
-  D -->|Contrast| G[Contrast Filter]
-  D -->|Blur| H[Blur Filter]
-  D -->|Sharpen| I[Sharpen Filter]
-  E & F & G & H & I -->|3. Process| J[OpenCV Processing]
-  J -->|4. Return| K[Response Handler]
+  A["Client Browser"] -->|HTTP Request| B["FastAPI Server"]
+  B -->|1. Load Image| C["Image Loader"]
+  C -->|2. Apply Filters| D["Filter Pipeline"]
+  D -->|Grayscale| E["Grayscale Filter"]
+  D -->|Brightness| F["Brightness Filter"]
+  D -->|Contrast| G["Contrast Filter"]
+  D -->|Blur| H["Blur Filter"]
+  D -->|Sharpen| I["Sharpen Filter"]
+  E & F & G & H & I -->|3. Process| J["OpenCV Processing"]
+  J -->|4. Return| K["Response Handler"]
   K -->|HTTP Response| A
+  
+  subgraph "Filter Processing"
+    E
+    F
+    G
+    H
+    I
+  end
+  
+  subgraph "Server Components"
+    B
+    C
+    D
+    J
+    K
+  end
 `
 
   const cloudArchitecture = `
 graph TD
-  A[Client Browser] -->|1. Request| B[React App]
-  B -->|2. POST Request| H[Load Balancer]
-  H -->|3. Route Request| G[ECS Fargate]
-  G -->|4. Pull Image| F[ECR Registry]
-  G -->|5. Process Request| C[FastAPI]
-  C -->|6. Apply Filters| D[Image Filters]
-  D -->|7. Generate| E[Response]
-  E -->|8. Store| K[S3 Cache]
-  E -->|9. Log| I[RDS Database]
-  K -->|10. Distribute| J[CloudFront CDN]
+  A["Client Browser"] -->|1. Request| B["React App"]
+  B -->|2. POST Request| H["Load Balancer"]
+  H -->|3. Route Request| G["ECS Fargate"]
+  G -->|4. Pull Image| F["ECR Registry"]
+  G -->|5. Process Request| C["FastAPI"]
+  C -->|6. Apply Filters| D["Image Filters"]
+  D -->|7. Generate| E["Response"]
+  E -->|8. Store| K["S3 Cache"]
+  E -->|9. Log| I["RDS Database"]
+  K -->|10. Distribute| J["CloudFront CDN"]
   J -->|11. Serve| B
   B -->|12. Display| A
+  
+  subgraph "AWS Cloud"
+    H
+    G
+    F
+    C
+    D
+    E
+    K
+    I
+    J
+  end
+  
+  subgraph "Client Side"
+    A
+    B
+  end
 `
 
   const toggleDisplayMode = () => {
@@ -88,7 +122,7 @@ graph TD
           </div>
         </div>
 
-        <div className="mb-8 overflow-auto bg-gray-50 dark:bg-gray-950 p-4 rounded-md border border-gray-200 dark:border-gray-800">
+        <div className="mb-4 overflow-auto bg-gray-50 dark:bg-gray-950 rounded-md border border-gray-200 dark:border-gray-800">
           {displayMode === "fallback" ? (
             view === "pipeline" ? (
               <FallbackDiagram
@@ -112,6 +146,21 @@ graph TD
             <MermaidDiagram chart={cloudArchitecture} caption="AWS Cloud Deployment Architecture" />
           )}
         </div>
+
+        {displayMode === "mermaid" && (
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md flex items-start gap-2">
+            <Info className="h-5 w-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="font-medium">Interactive Diagram Controls:</p>
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Use the zoom controls in the bottom right to zoom in and out</li>
+                <li>Click the pan button to enable pan mode, then click and drag to move around</li>
+                <li>Click the reset button to return to the original view</li>
+                <li>You can also use your mouse wheel to zoom in and out</li>
+              </ul>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Architecture Summary</h3>

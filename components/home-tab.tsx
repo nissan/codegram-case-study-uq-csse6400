@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label"
 import type { Filter } from "@/types/filter"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, ImageIcon, RefreshCw } from "lucide-react"
+import { Upload, ImageIcon, RefreshCw, FileText, ExternalLink, Linkedin, Twitter, Github } from "lucide-react"
+import Image from "next/image"
 
 interface HomeTabProps {
   selectedImage: string | null
@@ -151,223 +152,342 @@ export default function HomeTab({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
+      {/* Project Attribution Section */}
       <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
         <CardContent className="p-6">
-          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Image Source</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">About This Project</h2>
+          <div className="text-gray-700 dark:text-gray-300 space-y-4">
+            <p>
+              This application was developed as part of the CSSE6400 Software Architecture course at The University of
+              Queensland. It implements an image filter pipeline for Codegram, a social media platform for programmers
+              to share code screenshots.
+            </p>
 
-          <div className="space-y-4 mb-6">
-            <form onSubmit={handleUrlSubmit} className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Image URL"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700"
-              />
-              <Button type="submit" variant="secondary">
-                <ImageIcon className="mr-2 h-4 w-4" />
-                Load
-              </Button>
-            </form>
-
-            <div
-              ref={dropZoneRef}
-              className={`relative border-2 border-dashed rounded-md p-6 transition-all ${
-                isDragging
-                  ? "border-blue-500 bg-blue-500/10"
-                  : "border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
-              }`}
-              onDragEnter={handleDragEnter}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <div className="flex flex-col items-center justify-center space-y-2 text-center">
-                <Upload
-                  className={`h-10 w-10 mb-2 ${isDragging ? "text-blue-500" : "text-gray-400 dark:text-gray-500"}`}
-                />
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {isDragging ? "Drop image here" : "Drag and drop an image or click to browse"}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Supports JPG, PNG, GIF up to 10MB</p>
-              </div>
-              <input type="file" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} className="hidden" />
-              {isDragging && (
-                <div className="absolute inset-0 bg-blue-500/5 rounded-md flex flex-col items-center justify-center">
-                  {dragPreview === "image" && (
-                    <div className="mb-2 p-2 bg-white dark:bg-gray-800 rounded-md">
-                      <ImageIcon className="h-16 w-16 text-blue-500" />
-                    </div>
-                  )}
-                  <div className="text-blue-500 font-medium">Release to upload</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <a
+                href="https://csse6400.uqcloud.net/codegram-brief.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <FileText className="h-6 w-6 mr-3 text-blue-500" />
+                <div>
+                  <div className="font-medium text-gray-900 dark:text-white">Project Brief</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Last Updated: 2025/02/28</div>
                 </div>
-              )}
+                <ExternalLink className="ml-auto h-4 w-4 text-gray-400" />
+              </a>
+
+              <a
+                href="https://csse6400.uqcloud.net/codegram-writeup.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <FileText className="h-6 w-6 mr-3 text-blue-500" />
+                <div>
+                  <div className="font-medium text-gray-900 dark:text-white">Design Write-Up</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Last Updated: 2025/03/07</div>
+                </div>
+                <ExternalLink className="ml-auto h-4 w-4 text-gray-400" />
+              </a>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-gray-800 pt-4 mt-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Credits</h3>
+
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-1">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <p>
+                      <span className="font-medium text-gray-900 dark:text-white">Original Authors:</span>
+                      <br />
+                      Brae Webb & Richard Thomas
+                      <br />
+                      Course: CSSE6400 Software Architecture
+                      <br />
+                      Institution: The University of Queensland
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 overflow-hidden rounded-md border-2 border-gray-200 dark:border-gray-700">
+                      <Image
+                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-04-11%20at%202.06.44%E2%80%AFam-Yxn6JeTTU7lXkBm144UgLP8sjkaOUr.png"
+                        alt="Nissan Dookeran"
+                        width={80}
+                        height={80}
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">Implementation by:</h4>
+                      <p className="text-gray-900 dark:text-white font-medium">Nissan Dookeran</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <a
+                          href="https://github.com/nissan"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-800 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 flex items-center"
+                        >
+                          <Github className="h-4 w-4 mr-1" />
+                          <span className="text-sm">GitHub</span>
+                        </a>
+                        <a
+                          href="https://linkedin.com/in/nissandookeran"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
+                        >
+                          <Linkedin className="h-4 w-4 mr-1" />
+                          <span className="text-sm">LinkedIn</span>
+                        </a>
+                        <a
+                          href="https://x.com/redditech"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 flex items-center"
+                        >
+                          <Twitter className="h-4 w-4 mr-1" />
+                          <span className="text-sm">Twitter</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Filter Pipeline</h2>
-
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="filters">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3 mb-6">
-                  {filters.map((filter, index) => (
-                    <Draggable key={filter.id} draggableId={filter.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`p-3 rounded-md border ${
-                            filter.enabled
-                              ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                              : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={filter.enabled}
-                                onCheckedChange={() => onFilterToggle(filter.id)}
-                                id={`filter-${filter.id}`}
-                              />
-                              <Label
-                                htmlFor={`filter-${filter.id}`}
-                                className="capitalize text-gray-800 dark:text-gray-200"
-                              >
-                                {filter.name}
-                              </Label>
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">{index + 1}</div>
-                          </div>
-
-                          {filter.enabled && (
-                            <div className="mt-3 space-y-3">
-                              {Object.entries(filter.params).map(([param, value]) => (
-                                <div key={param} className="space-y-2">
-                                  <div className="flex justify-between">
-                                    <Label className="text-xs text-gray-600 dark:text-gray-400 capitalize">
-                                      {param}
-                                    </Label>
-                                    <span className="text-xs text-gray-700 dark:text-gray-300">{value}</span>
-                                  </div>
-                                  <Slider
-                                    value={[value]}
-                                    min={0}
-                                    max={100}
-                                    step={1}
-                                    onValueChange={(values) => onFilterParamChange(filter.id, param, values[0])}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-
-          <Button
-            onClick={handleProcessImage}
-            disabled={!selectedImage || enabledFilters.length === 0 || isProcessing}
-            className="w-full"
-          >
-            {isProcessing ? (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              "Apply Filters"
-            )}
-          </Button>
         </CardContent>
       </Card>
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
           <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Image Preview</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Image Source</h2>
 
-            <Tabs defaultValue="original">
-              <TabsList className="grid w-full grid-cols-2 mb-4 bg-gray-100 dark:bg-gray-800">
-                <TabsTrigger
-                  value="original"
-                  className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
-                >
-                  Original
-                </TabsTrigger>
-                <TabsTrigger
-                  value="processed"
-                  disabled={!showProcessed}
-                  className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
-                >
-                  Processed
-                </TabsTrigger>
-              </TabsList>
+            <div className="space-y-4 mb-6">
+              <form onSubmit={handleUrlSubmit} className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Image URL"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+                />
+                <Button type="submit" variant="secondary">
+                  <ImageIcon className="mr-2 h-4 w-4" />
+                  Load
+                </Button>
+              </form>
 
-              <TabsContent value="original">
-                {selectedImage ? (
-                  <div className="border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden">
-                    <img
-                      src={selectedImage || "/placeholder.svg"}
-                      alt="Original"
-                      className="w-full h-auto max-h-[400px] object-contain bg-gray-100 dark:bg-gray-800"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[300px] bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-                    <p className="text-gray-500 dark:text-gray-400">No image selected</p>
+              <div
+                ref={dropZoneRef}
+                className={`relative border-2 border-dashed rounded-md p-6 transition-all ${
+                  isDragging
+                    ? "border-blue-500 bg-blue-500/10"
+                    : "border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
+                }`}
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="flex flex-col items-center justify-center space-y-2 text-center">
+                  <Upload
+                    className={`h-10 w-10 mb-2 ${isDragging ? "text-blue-500" : "text-gray-400 dark:text-gray-500"}`}
+                  />
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {isDragging ? "Drop image here" : "Drag and drop an image or click to browse"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Supports JPG, PNG, GIF up to 10MB</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  ref={fileInputRef}
+                  className="hidden"
+                />
+                {isDragging && (
+                  <div className="absolute inset-0 bg-blue-500/5 rounded-md flex flex-col items-center justify-center">
+                    {dragPreview === "image" && (
+                      <div className="mb-2 p-2 bg-white dark:bg-gray-800 rounded-md">
+                        <ImageIcon className="h-16 w-16 text-blue-500" />
+                      </div>
+                    )}
+                    <div className="text-blue-500 font-medium">Release to upload</div>
                   </div>
                 )}
-              </TabsContent>
+              </div>
+            </div>
 
-              <TabsContent value="processed">
-                {selectedImage && showProcessed ? (
-                  <div className="border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden">
-                    <img
-                      src={selectedImage || "/placeholder.svg"}
-                      alt="Processed"
-                      className={`w-full h-auto max-h-[400px] object-contain bg-gray-100 dark:bg-gray-800 ${
-                        enabledFilters.some((f) => f.name === "grayscale") ? "grayscale" : ""
-                      } ${enabledFilters.some((f) => f.name === "blur") ? "blur-sm" : ""}`}
-                      style={{
-                        filter: enabledFilters
-                          .filter((f) => ["brightness", "contrast"].includes(f.name))
-                          .map((f) => {
-                            if (f.name === "brightness") return `brightness(${f.params.level / 50})`
-                            if (f.name === "contrast") return `contrast(${f.params.level / 50})`
-                            return ""
-                          })
-                          .join(" "),
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[300px] bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
-                    <p className="text-gray-500 dark:text-gray-400">Process an image to see results</p>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Filter Pipeline</h2>
+
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="filters">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3 mb-6">
+                    {filters.map((filter, index) => (
+                      <Draggable key={filter.id} draggableId={filter.id} index={index}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`p-3 rounded-md border ${
+                              filter.enabled
+                                ? "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                                : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Switch
+                                  checked={filter.enabled}
+                                  onCheckedChange={() => onFilterToggle(filter.id)}
+                                  id={`filter-${filter.id}`}
+                                />
+                                <Label
+                                  htmlFor={`filter-${filter.id}`}
+                                  className="capitalize text-gray-800 dark:text-gray-200"
+                                >
+                                  {filter.name}
+                                </Label>
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">{index + 1}</div>
+                            </div>
+
+                            {filter.enabled && (
+                              <div className="mt-3 space-y-3">
+                                {Object.entries(filter.params).map(([param, value]) => (
+                                  <div key={param} className="space-y-2">
+                                    <div className="flex justify-between">
+                                      <Label className="text-xs text-gray-600 dark:text-gray-400 capitalize">
+                                        {param}
+                                      </Label>
+                                      <span className="text-xs text-gray-700 dark:text-gray-300">{value}</span>
+                                    </div>
+                                    <Slider
+                                      value={[value]}
+                                      min={0}
+                                      max={100}
+                                      step={1}
+                                      onValueChange={(values) => onFilterParamChange(filter.id, param, values[0])}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
                   </div>
                 )}
-              </TabsContent>
-            </Tabs>
+              </Droppable>
+            </DragDropContext>
+
+            <Button
+              onClick={handleProcessImage}
+              disabled={!selectedImage || enabledFilters.length === 0 || isProcessing}
+              className="w-full"
+            >
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Apply Filters"
+              )}
+            </Button>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Request Payload</h2>
-            <pre className="bg-gray-50 dark:bg-gray-950 p-4 rounded-md border border-gray-200 dark:border-gray-800 overflow-auto text-sm font-mono">
-              {JSON.stringify(requestPayload, null, 2)}
-            </pre>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Image Preview</h2>
+
+              <Tabs defaultValue="original">
+                <TabsList className="grid w-full grid-cols-2 mb-4 bg-gray-100 dark:bg-gray-800">
+                  <TabsTrigger
+                    value="original"
+                    className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
+                  >
+                    Original
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="processed"
+                    disabled={!showProcessed}
+                    className="text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white"
+                  >
+                    Processed
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="original">
+                  {selectedImage ? (
+                    <div className="border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden">
+                      <img
+                        src={selectedImage || "/placeholder.svg"}
+                        alt="Original"
+                        className="w-full h-auto max-h-[400px] object-contain bg-gray-100 dark:bg-gray-800"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-[300px] bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+                      <p className="text-gray-500 dark:text-gray-400">No image selected</p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="processed">
+                  {selectedImage && showProcessed ? (
+                    <div className="border border-gray-200 dark:border-gray-800 rounded-md overflow-hidden">
+                      <img
+                        src={selectedImage || "/placeholder.svg"}
+                        alt="Processed"
+                        className={`w-full h-auto max-h-[400px] object-contain bg-gray-100 dark:bg-gray-800 ${
+                          enabledFilters.some((f) => f.name === "grayscale") ? "grayscale" : ""
+                        } ${enabledFilters.some((f) => f.name === "blur") ? "blur-sm" : ""}`}
+                        style={{
+                          filter: enabledFilters
+                            .filter((f) => ["brightness", "contrast"].includes(f.name))
+                            .map((f) => {
+                              if (f.name === "brightness") return `brightness(${f.params.level / 50})`
+                              if (f.name === "contrast") return `contrast(${f.params.level / 50})`
+                              return ""
+                            })
+                            .join(" "),
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-[300px] bg-gray-100 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+                      <p className="text-gray-500 dark:text-gray-400">Process an image to see results</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-sm">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Request Payload</h2>
+              <pre className="bg-gray-50 dark:bg-gray-950 p-4 rounded-md border border-gray-200 dark:border-gray-800 overflow-auto text-sm font-mono">
+                {JSON.stringify(requestPayload, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
