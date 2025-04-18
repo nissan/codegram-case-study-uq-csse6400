@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect } from "react"
-import { useEffectEvent } from "@/hooks/use-effect-event"
+import { useEffect, useCallback } from "react"
 
 export default function MermaidScript() {
   // Function to remove "Unsupported markdown: list" text
-  const removeUnsupportedMarkdownText = useEffectEvent(() => {
+  const removeUnsupportedMarkdownText = useCallback(() => {
     // Find all text elements in the document
     const textElements = document.querySelectorAll("text")
 
@@ -30,7 +29,7 @@ export default function MermaidScript() {
       marker.classList.add("hide-unsupported-markdown")
       ;(marker as HTMLElement).style.display = "none"
     })
-  })
+  }, [])
 
   useEffect(() => {
     // Run immediately
@@ -56,7 +55,7 @@ export default function MermaidScript() {
       observer.disconnect()
       clearInterval(interval)
     }
-  }, [])
+  }, [removeUnsupportedMarkdownText])
 
   return null
 }

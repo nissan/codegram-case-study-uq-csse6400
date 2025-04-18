@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { FallbackCode } from "./fallback-code"
 import { Copy, Check } from "lucide-react"
-import { useEffectEvent } from "@/hooks/use-effect-event"
 
 interface CodeProps {
   children: string
@@ -96,8 +95,8 @@ export function Code({ children, language = "javascript", className }: CodeProps
     }
   }, [children, language, mounted, loadFailed])
 
-  // Use useEffectEvent instead of useCallback
-  const copyToClipboard = useEffectEvent(async () => {
+  // Use useCallback instead of useEffectEvent
+  const copyToClipboard = useCallback(async () => {
     if (navigator.clipboard && children) {
       try {
         await navigator.clipboard.writeText(children)
@@ -107,7 +106,7 @@ export function Code({ children, language = "javascript", className }: CodeProps
         console.error("Failed to copy text: ", err)
       }
     }
-  })
+  }, [children])
 
   if (!mounted) {
     // Return a placeholder while the component is mounting
