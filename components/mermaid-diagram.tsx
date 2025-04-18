@@ -150,11 +150,14 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
 
         // Render the diagram
         await mermaid.run({
-          nodes: [document.getElementById(id)],
+          querySelector: `#${id}`,
         })
 
         // Set the diagram ref for panzoom
-        diagramRef.current = document.getElementById(`diagram-container-${id}`)
+        const diagramContainer = document.getElementById(`diagram-container-${id}`)
+        if (diagramContainer instanceof HTMLDivElement) {
+          diagramRef.current = diagramContainer
+        }
 
         // Initialize panzoom
         await initPanzoom()
