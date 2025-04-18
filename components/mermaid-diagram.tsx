@@ -99,7 +99,7 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
         // Import mermaid dynamically
         const mermaid = (await import("mermaid")).default
 
-        // Configure mermaid
+        // Configure mermaid with more robust settings
         mermaid.initialize({
           startOnLoad: false,
           theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
@@ -108,15 +108,38 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
           logLevel: "error",
           flowchart: {
             htmlLabels: true,
-            useMaxWidth: false, // Important for zooming
+            useMaxWidth: false,
             curve: "basis",
             diagramPadding: 8,
+            nodeSpacing: 50,
+            rankSpacing: 50,
+          },
+          sequence: {
+            diagramMarginX: 50,
+            diagramMarginY: 10,
+            actorMargin: 50,
+            width: 150,
+            height: 65,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35,
+            mirrorActors: true,
+          },
+          gantt: {
+            titleTopMargin: 25,
+            barHeight: 20,
+            barGap: 4,
+            topPadding: 50,
+            leftPadding: 75,
+            gridLineStartPadding: 35,
+            fontSize: 11,
+            numberSectionStyles: 4,
+            axisFormat: "%Y-%m-%d",
           },
         })
 
         // Sanitize the chart definition to prevent markdown list interpretation
-        // Replace any line that starts with a dash, asterisk, or plus followed by a space
-        // with the same character but without triggering markdown list interpretation
         const sanitizedChart = chart
           .split("\n")
           .map((line) => {
@@ -148,10 +171,16 @@ export default function MermaidDiagram({ chart, caption, className = "" }: Merma
           mermaidElement.textContent = sanitizedChart
         }
 
-        // Render the diagram
-        await mermaid.run({
-          querySelector: `#${id}`,
-        })
+        // Render the diagram with error handling
+        try {
+          await mermaid.run({
+            querySelector: `#${id}`,
+          })
+        } catch (error) {
+          console.error("Mermaid rendering error:", error)
+          setRenderError(error instanceof Error ? error.message : String(error))
+          return
+        }
 
         // Set the diagram ref for panzoom
         const diagramContainer = document.getElementById(`diagram-container-${id}`)
